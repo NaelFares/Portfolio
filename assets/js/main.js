@@ -1,0 +1,418 @@
+/*-----------------------------------------------------------------------------------
+
+Theme Name: Gerold - Personal Portfolio HTML5 Template
+Theme URI: https://themejunction.net/html/gerold/demo/
+Author: Theme-Junction
+Author URI: https://themeforest.net/user/theme-junction
+Description: Gerold - Personal Portfolio HTML5 Template
+
+-----------------------------------------------------------------------------------
+
+/***************************************************
+==================== JS INDEX ======================
+****************************************************
+// Data js
+// Sidebar Navigation
+// Sticky Header
+// Hamburger Menu
+// Scroll To Section
+// OnePage Active Class
+// Portfolio Filter
+// Portfolio Gallery Carousel
+// Testimonial Carousel
+// Nice Select
+// ALL Popup
+// Preloader
+// Sidebar Hover BG Color
+// Services Hover BG
+// Portfolio Filter BG Color
+// Funfact
+// WoW Js
+
+****************************************************/
+
+(function ($) {
+	"use strict";
+
+	/*------------------------------------------------------
+  /  Data js
+  /------------------------------------------------------*/
+	$("[data-bg-image]").each(function () {
+		$(this).css(
+			"background-image",
+			"url(" + $(this).attr("data-bg-image") + ")"
+		);
+	});
+
+	$("[data-bg-color]").each(function () {
+		$(this).css("background-color", $(this).attr("data-bg-color"));
+	});
+
+	$(document).ready(function ($) {
+
+		/*------------------------------------------------------
+  	/  Sticky Header
+  	/------------------------------------------------------*/
+	var lastScrollTop = 0;
+	$(window).scroll(function () {
+		var scroll = $(window).scrollTop();
+
+		if (scroll > 300) {
+			$(".tj-header-area.header-sticky").addClass("sticky");
+			$(".tj-header-area.header-sticky").removeClass("sticky-out");
+		} else if (scroll < lastScrollTop) {
+			if (scroll < 500) {
+				$(".tj-header-area.header-sticky").addClass("sticky-out");
+				$(".tj-header-area.header-sticky").removeClass("sticky");
+			}
+		} else {
+			$(".tj-header-area.header-sticky").removeClass("sticky");
+		}
+
+		lastScrollTop = scroll;
+	});
+		
+
+		/*------------------------------------------------------
+  	/  Hamburger Menu
+  	/------------------------------------------------------*/
+		$(".menu-bar").on("click", function () {
+			$(".menu-bar").toggleClass("menu-bar-toggeled");
+			$(".header-menu").toggleClass("opened");
+			$("body").toggleClass("overflow-hidden");
+		});
+
+		$(".header-menu ul li a").on("click", function () {
+			$(".menu-bar").removeClass("menu-bar-toggeled");
+			$(".header-menu").removeClass("opened");
+			$("body").removeClass("overflow-hidden");
+		});
+
+		/*------------------------------------------------------
+  	/  OnePage Active Class
+  	/------------------------------------------------------*/
+		function onPageNav(switchName) {
+			const navSwitch = $(switchName);
+			const deductHeight = 60;
+			let navArr = [];
+
+			navSwitch.each(function (i) {
+				let navSwitchHref = $(this).attr("href");
+				let tgtOff = $(navSwitchHref).offset().top - deductHeight;
+				navArr.push([]);
+				navArr[i].switch = $(this);
+				navArr[i].tgtOff = tgtOff;
+			});
+			//        console.log(navArr);
+			$(window).scroll(function () {
+				for (let i = 0; i < navArr.length; i++) {
+					let scroll = $(window).scrollTop();
+					let tgtKey = navArr[i];
+					let tgtSwitch = tgtKey.switch;
+					let tgtOff = tgtKey.tgtOff;
+					if (scroll >= tgtOff) {
+						navSwitch.parent().removeClass("is-current");
+						tgtSwitch.parent().addClass("is-current");
+					} else {
+						tgtSwitch.parent().removeClass("is-current");
+					}
+				}
+			});
+		}
+		$(window).on("load resize", function () {
+			onPageNav(".side-navbar a");
+		});
+
+		$(".header-menu nav ul").onePageNav({
+			currentClass: "current-menu-ancestor",
+			changeHash: false,
+			easing: "swing",
+		});
+
+		/*------------------------------------------------------
+  	/  Portfolio Filter avec Multiselection
+  	/------------------------------------------------------*/
+		const $grid = $('.projects-grid').isotope({
+			itemSelector: '.project-item',
+			layoutMode: 'masonry',
+			masonry: {
+				columnWidth: '.project-item',
+				gutter: 30
+			}
+		});
+
+		// Gestion des filtres
+		$('.filter-button-group').on('click', 'button', function() {
+			const $this = $(this);
+			const isAll = $this.data('filter') === '*';
+			
+			$this.toggleClass('tj-active-filter');
+			
+			if(isAll) {
+				$('.filter-button-group button').not(this).removeClass('tj-active-filter');
+			} else {
+				$('.filter-button-group button[data-filter="*"]').removeClass('tj-active-filter');
+			}
+
+			const filters = [];
+			$('.tj-active-filter').each(function() {
+				filters.push($(this).data('filter').replace(' ', '.'));
+			});
+			
+			if(filters.length === 0) {
+				$('.filter-button-group button[data-filter="*"]').addClass('tj-active-filter');
+				filters.push('*');
+			}
+			
+			const filterValue = filters.length ? filters.join(', ') : '*';
+			$grid.isotope({ filter: filterValue });
+		});
+
+		// Réinitialisation après chargement
+		$(window).on('load', function() {
+			$grid.isotope('layout');
+		});
+
+		/*------------------------------------------------------
+  	/  ALL Popup
+  	/------------------------------------------------------*/
+		if ($(".popup_video").length > 0) {
+			$(`.popup_video`).lightcase({
+				transition: "elastic",
+				showSequenceInfo: false,
+				slideshow: false,
+				swipe: true,
+				showTitle: false,
+				showCaption: false,
+				controls: true,
+			});
+		}
+
+		$(".project-card").magnificPopup({
+			type: "inline",
+			fixedContentPos: true,
+			fixedBgPos: true,
+			overflowY: "auto",
+			closeBtnInside: true,
+			preloader: false,
+			midClick: true,
+			removalDelay: 500,
+			mainClass: 'my-mfp-zoom-in',
+			callbacks: {
+				beforeOpen: function() {
+					$.magnificPopup.close();
+				},
+				open: function() {
+					// Animation au scroll
+					$('.modal-gallery-item').each(function(i) {
+						$(this).delay(i * 150).animate({
+							opacity: 1,
+							transform: 'translateY(0)'
+						}, 400);
+					});
+				}
+			}
+		});
+	});
+
+	$(window).on("load", function () {
+		/*------------------------------------------------------
+  	/  WoW Js
+  	/------------------------------------------------------*/
+		var wow = new WOW({
+			boxClass: "wow", // default
+			animateClass: "animated", // default
+			offset: 100, // default
+			mobile: true, // default
+			live: true, // default
+		});
+		wow.init();
+
+		/*------------------------------------------------------
+  	/  Preloader
+  	/------------------------------------------------------*/
+		const svg = document.getElementById("preloaderSvg");
+		const tl = gsap.timeline();
+		const curve = "M0 502S175 272 500 272s500 230 500 230V0H0Z";
+		const flat = "M0 2S175 1 500 1s500 1 500 1V0H0Z";
+
+		tl.to(".preloader-heading .load-text , .preloader-heading .cont", {
+			delay: 1.5,
+			y: -100,
+			opacity: 0,
+		});
+		tl.to(svg, {
+			duration: 0.5,
+			attr: { d: curve },
+			ease: "power2.easeIn",
+		}).to(svg, {
+			duration: 0.5,
+			attr: { d: flat },
+			ease: "power2.easeOut",
+		});
+		tl.to(".preloader", {
+			y: -1500,
+		});
+		tl.to(".preloader", {
+			zIndex: -1,
+			display: "none",
+		});
+	});
+
+	document.addEventListener("DOMContentLoaded", function() {
+		const progressBars = document.querySelectorAll('.progress-bar');
+		
+		progressBars.forEach(bar => {
+			const width = bar.getAttribute('aria-valuenow') + '%';
+			bar.style.setProperty('--progress-width', width);
+		});
+	});
+
+	// Header Sticky
+	const header = document.querySelector('.tj-header-area.header-2');
+	let lastScroll = 0;
+
+	window.addEventListener('scroll', () => {
+		const currentScroll = window.scrollY;
+		
+		if (currentScroll > lastScroll && currentScroll > 50) {
+			// Scrolling down
+			header.classList.add('sticky');
+		} else if (currentScroll < lastScroll && currentScroll <= 50) {
+			// Scrolling up and at top
+			header.classList.remove('sticky');
+		}
+		
+		lastScroll = currentScroll;
+	});
+
+	document.addEventListener('DOMContentLoaded', function() {
+		const competenceCards = document.querySelectorAll('.competence-card');
+		
+		competenceCards.forEach(card => {
+			card.addEventListener('click', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+				
+				requestAnimationFrame(() => {
+					this.classList.toggle('active');
+					updateCardStates();
+				});
+			});
+		});
+		
+		document.addEventListener('click', function(e) {
+			if (!e.target.closest('.competence-card')) {
+				requestAnimationFrame(() => {
+					competenceCards.forEach(card => {
+						card.classList.remove('active');
+					});
+					updateCardStates();
+				});
+			}
+		});
+		
+		function updateCardStates() {
+			const activeCards = document.querySelectorAll('.competence-card.active');
+			
+			competenceCards.forEach(card => {
+				if (!card.classList.contains('active')) {
+					if (activeCards.length > 0) {
+						card.classList.add('mleave');
+					} else {
+						card.classList.remove('mleave');
+					}
+				} else {
+					card.classList.remove('mleave');
+				}
+			});
+		}
+		
+		// Animation à l'apparition des cartes
+		function animateCards() {
+			competenceCards.forEach((card, index) => {
+				requestAnimationFrame(() => {
+					setTimeout(() => {
+						card.style.opacity = '1';
+						card.style.transform = 'scale(0.95)';
+					}, index * 100);
+				});
+			});
+		}
+		
+		// Initialisation des cartes
+		competenceCards.forEach(card => {
+			card.style.opacity = '0';
+			card.style.transform = 'scale(0.9)';
+		});
+		
+		// Déclenche l'animation initiale
+		setTimeout(animateCards, 300);
+	});
+
+})(jQuery);
+
+function handleCompetenceClick(e) {
+	e.preventDefault();
+	e.stopPropagation();
+
+	// Vérification de l'attribut data-competences
+	const competencesAttr = e.currentTarget.dataset.competences;
+	if (!competencesAttr) {
+		console.error("L'attribut data-competences est manquant.");
+		return;
+	}
+
+	// Conversion en tableau de compétences
+	const competences = competencesAttr.split(',').map(c => c.trim());
+	
+	// Scroll vers la section compétences
+	const section = document.getElementById('competences-section');
+	if (!section) {
+		console.error("Section 'competences-section' non trouvée.");
+		return;
+	}
+	section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+	// Activation des cartes de compétences
+	document.querySelectorAll('.competence-card').forEach(card => {
+		const title = card.querySelector('.competence-title')?.innerText.trim() || '';
+		const shouldActivate = competences.includes(title);
+		card.classList.toggle('active', shouldActivate);
+	});
+
+	// Activation des cartes de projets
+	document.querySelectorAll('.project-card').forEach(projectCard => {
+		const projectCompetencesAttr = projectCard.dataset.competences;
+		if (!projectCompetencesAttr) return;
+		
+		const projectCompetences = projectCompetencesAttr.split(',').map(c => c.trim());
+		const isActive = projectCompetences.some(c => competences.includes(c));
+		projectCard.classList.toggle('active', isActive);
+	});
+
+	// Animation après le scroll
+	setTimeout(() => {
+		document.querySelectorAll('.competence-card.active, .project-card.active').forEach(card => {
+			card.style.transform = 'translateY(0)';
+			card.style.opacity = '1';
+		});
+	}, 500);
+}
+
+function filterProjects(element) {
+	// Récupère le filtre depuis l'attribut data-filter
+	const filter = element.getAttribute('data-filter');
+	
+	// Active le filtre correspondant
+	const filterButton = document.querySelector(`.filter-button-group button[data-filter="${filter}"]`);
+	if (filterButton) {
+		filterButton.click();
+	}
+	
+	// Scroll vers la section projets
+	document.querySelector('#projects-section').scrollIntoView({
+		behavior: 'smooth'
+	});
+}
+
