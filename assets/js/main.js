@@ -367,39 +367,40 @@
 		setTimeout(animateCards, 300);
 	});
 })(jQuery);
+const parseCompetenceList = (value = '') => value
+	.split(',')
+	.map(item => item.trim().toLowerCase())
+	.filter(Boolean);
+
 function handleCompetenceClick(e) {
 	e.preventDefault();
 	e.stopPropagation();
-	// Vérification de l'attribut data-competences
 	const competencesAttr = e.currentTarget.dataset.competences;
 	if (!competencesAttr) {
-		console.error("L'attribut data-competences est manquant.");
+		console.error("Missing data-competences attribute.");
 		return;
 	}
-	// Conversion en tableau de compétences
-	const competences = competencesAttr.split(',').map(c => c.trim());
-	// Scroll vers la section compétences
+	const competenceSet = new Set(parseCompetenceList(competencesAttr));
+	if (!competenceSet.size) {
+		return;
+	}
 	const section = document.getElementById('competences-section');
 	if (!section) {
-		console.error("Section 'competences-section' non trouvée.");
+		console.error("Section 'competences-section' not found.");
 		return;
 	}
 	section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-	// Activation des cartes de compétences
 	document.querySelectorAll('.competence-card').forEach(card => {
-		const title = card.querySelector('.competence-title')?.innerText.trim() || '';
-		const shouldActivate = competences.includes(title);
-		card.classList.toggle('active', shouldActivate);
+		const title = card.querySelector('.competence-title')?.innerText.trim().toLowerCase() || '';
+		card.classList.toggle('active', competenceSet.has(title));
 	});
-	// Activation des cartes de projets
 	document.querySelectorAll('.project-card').forEach(projectCard => {
 		const projectCompetencesAttr = projectCard.dataset.competences;
-		if (!projectCompetencesAttr) return;
-		const projectCompetences = projectCompetencesAttr.split(',').map(c => c.trim());
-		const isActive = projectCompetences.some(c => competences.includes(c));
+		const source = projectCompetencesAttr ? projectCompetencesAttr : Array.from(projectCard.querySelectorAll('.competence-tag')).map(tag => tag.innerText);
+		const projectCompetences = Array.isArray(source) ? source.map(item => item.trim().toLowerCase()).filter(Boolean) : parseCompetenceList(source);
+		const isActive = projectCompetences.some(label => competenceSet.has(label));
 		projectCard.classList.toggle('active', isActive);
 	});
-	// Animation après le scroll
 	setTimeout(() => {
 		document.querySelectorAll('.competence-card.active, .project-card.active').forEach(card => {
 			card.style.transform = 'translateY(0)';
@@ -407,6 +408,7 @@ function handleCompetenceClick(e) {
 		});
 	}, 500);
 }
+
 function filterProjects(element) {
 	// Récupère le filtre depuis l'attribut data-filter
 	const filter = element.getAttribute('data-filter');
