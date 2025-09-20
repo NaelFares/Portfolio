@@ -3729,6 +3729,103 @@ body.absolute_header .breadcrumb_area {
     transition: all 0.3s ease;
 }
 
+.about-summary-text {
+    font-size: 1rem;
+    color: rgba(28, 42, 58, 0.75);
+    margin-bottom: 0;
+}
+
+.about-stat-grid .about-stat-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: 18px;
+    padding: 18px 20px;
+    border: 1px solid rgba(30, 120, 255, 0.12);
+    box-shadow: 0 12px 24px rgba(15, 28, 42, 0.08);
+    height: 100%;
+}
+
+.about-stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: rgba(30, 120, 255, 0.15);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--tj-theme-primary);
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.about-stat-label {
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    font-weight: var(--tj-fw-sbold);
+    color: var(--tj-heading-primary);
+    margin-bottom: 6px;
+}
+
+.about-stat-value {
+    color: rgba(28, 42, 58, 0.82);
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.about-detail-card {
+    background: rgba(255, 255, 255, 0.94);
+    border-radius: 20px;
+    padding: 24px 26px;
+    border: 1px solid rgba(30, 120, 255, 0.12);
+    box-shadow: 0 16px 34px rgba(15, 28, 42, 0.1);
+    height: 100%;
+}
+
+.about-detail-title {
+    font-size: 1.1rem;
+    margin-bottom: 14px;
+    color: var(--tj-heading-primary);
+}
+
+.about-detail-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: rgba(28, 42, 58, 0.8);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.about-detail-list li {
+    position: relative;
+    padding-left: 20px;
+}
+
+.about-detail-list li::before {
+    content: '\2022';
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--tj-theme-primary);
+    font-weight: var(--tj-fw-bold);
+}
+
+@media (max-width: 767px) {
+    .about-detail-card {
+        padding: 20px;
+    }
+    .about-stat-grid .about-stat-card {
+        padding: 16px;
+    }
+}
+
 
 .profile-content {
     padding-left: 50px;
