@@ -1,13 +1,3 @@
-/*-----------------------------------------------------------------------------------
-
-Theme Name: Gerold - Personal Portfolio HTML5 Template
-Theme URI: https://themejunction.net/html/gerold/demo/
-Author: Theme-Junction
-Author URI: https://themeforest.net/user/theme-junction
-Description: Gerold - Personal Portfolio HTML5 Template
-
------------------------------------------------------------------------------------
-
 /***************************************************
 ==================== JS INDEX ======================
 ****************************************************
@@ -22,18 +12,14 @@ Description: Gerold - Personal Portfolio HTML5 Template
 // Testimonial Carousel
 // Nice Select
 // ALL Popup
-// Preloader
 // Sidebar Hover BG Color
 // Services Hover BG
 // Portfolio Filter BG Color
 // Funfact
 // WoW Js
-
 ****************************************************/
-
 (function ($) {
 	"use strict";
-
 	/*------------------------------------------------------
   /  Data js
   /------------------------------------------------------*/
@@ -43,20 +29,16 @@ Description: Gerold - Personal Portfolio HTML5 Template
 			"url(" + $(this).attr("data-bg-image") + ")"
 		);
 	});
-
 	$("[data-bg-color]").each(function () {
 		$(this).css("background-color", $(this).attr("data-bg-color"));
 	});
-
 	$(document).ready(function ($) {
-
 		/*------------------------------------------------------
   	/  Sticky Header
   	/------------------------------------------------------*/
 	var lastScrollTop = 0;
 	$(window).scroll(function () {
 		var scroll = $(window).scrollTop();
-
 		if (scroll > 300) {
 			$(".tj-header-area.header-sticky").addClass("sticky");
 			$(".tj-header-area.header-sticky").removeClass("sticky-out");
@@ -68,11 +50,8 @@ Description: Gerold - Personal Portfolio HTML5 Template
 		} else {
 			$(".tj-header-area.header-sticky").removeClass("sticky");
 		}
-
 		lastScrollTop = scroll;
 	});
-		
-
 		/*------------------------------------------------------
   	/  Hamburger Menu
   	/------------------------------------------------------*/
@@ -81,13 +60,11 @@ Description: Gerold - Personal Portfolio HTML5 Template
 			$(".header-menu").toggleClass("opened");
 			$("body").toggleClass("overflow-hidden");
 		});
-
 		$(".header-menu ul li a").on("click", function () {
 			$(".menu-bar").removeClass("menu-bar-toggeled");
 			$(".header-menu").removeClass("opened");
 			$("body").removeClass("overflow-hidden");
 		});
-
 		/*------------------------------------------------------
   	/  OnePage Active Class
   	/------------------------------------------------------*/
@@ -95,7 +72,6 @@ Description: Gerold - Personal Portfolio HTML5 Template
 			const navSwitch = $(switchName);
 			const deductHeight = 60;
 			let navArr = [];
-
 			navSwitch.each(function (i) {
 				let navSwitchHref = $(this).attr("href");
 				let tgtOff = $(navSwitchHref).offset().top - deductHeight;
@@ -122,13 +98,11 @@ Description: Gerold - Personal Portfolio HTML5 Template
 		$(window).on("load resize", function () {
 			onPageNav(".side-navbar a");
 		});
-
 		$(".header-menu nav ul").onePageNav({
 			currentClass: "current-menu-ancestor",
 			changeHash: false,
 			easing: "swing",
 		});
-
 		/*------------------------------------------------------
   	/  Portfolio Filter avec Multiselection
   	/------------------------------------------------------*/
@@ -140,54 +114,127 @@ Description: Gerold - Personal Portfolio HTML5 Template
 				gutter: 30
 			}
 		});
-
 		// Gestion des filtres
 		$('.filter-button-group').on('click', 'button', function() {
 			const $this = $(this);
 			const isAll = $this.data('filter') === '*';
-			
 			$this.toggleClass('tj-active-filter');
-			
 			if(isAll) {
 				$('.filter-button-group button').not(this).removeClass('tj-active-filter');
 			} else {
 				$('.filter-button-group button[data-filter="*"]').removeClass('tj-active-filter');
 			}
-
 			const filters = [];
 			$('.tj-active-filter').each(function() {
 				filters.push($(this).data('filter').replace(' ', '.'));
 			});
-			
 			if(filters.length === 0) {
 				$('.filter-button-group button[data-filter="*"]').addClass('tj-active-filter');
 				filters.push('*');
 			}
-			
 			const filterValue = filters.length ? filters.join(', ') : '*';
 			$grid.isotope({ filter: filterValue });
 		});
-
 		// Réinitialisation après chargement
 		$(window).on('load', function() {
 			$grid.isotope('layout');
 		});
-
 		/*------------------------------------------------------
   	/  ALL Popup
   	/------------------------------------------------------*/
-		if ($(".popup_video").length > 0) {
-			$(`.popup_video`).lightcase({
-				transition: "elastic",
-				showSequenceInfo: false,
-				slideshow: false,
-				swipe: true,
-				showTitle: false,
-				showCaption: false,
-				controls: true,
+		const unlockScroll = () => {
+			const doc = document.documentElement;
+			doc.style.removeProperty('overflow');
+			document.body.style.removeProperty('overflow');
+			document.body.style.removeProperty('margin-right');
+			document.body.classList.remove('mfp-helper');
+			document.body.classList.remove('modal-image-open');
+			requestAnimationFrame(() => {
+				doc.style.removeProperty('overflow');
+				document.body.style.removeProperty('overflow');
+				document.body.style.removeProperty('margin-right');
+				document.body.classList.remove('modal-image-open');
 			});
-		}
-
+		};
+		const modalImageViewer = (() => {
+			let viewer;
+			let viewerImage;
+			let viewerCaption;
+			const closeViewer = () => {
+				if (!viewer || !viewer.classList.contains('is-active')) {
+					return;
+				}
+				viewer.classList.remove('is-active');
+				viewer.setAttribute('aria-hidden', 'true');
+				document.body.classList.remove('modal-image-open');
+			};
+			const ensureViewer = () => {
+				if (viewer) {
+					return viewer;
+				}
+				viewer = document.createElement('div');
+				viewer.className = 'modal-image-viewer';
+				viewer.setAttribute('aria-hidden', 'true');
+				viewer.innerHTML = `
+					<div class="modal-image-viewer__backdrop"></div>
+					<div class="modal-image-viewer__content" role="dialog" aria-modal="true">
+						<button class="modal-image-viewer__close" type="button" aria-label="Fermer l'image"></button>
+						<img class="modal-image-viewer__img" src="" alt="" />
+						<p class="modal-image-viewer__caption"></p>
+					</div>
+				`;
+				document.body.appendChild(viewer);
+				viewerImage = viewer.querySelector('.modal-image-viewer__img');
+				viewerCaption = viewer.querySelector('.modal-image-viewer__caption');
+				const closeButton = viewer.querySelector('.modal-image-viewer__close');
+				const handleClose = (event) => {
+					event.preventDefault();
+					closeViewer();
+				};
+				viewer.addEventListener('click', (event) => {
+					if (event.target === viewer || event.target.classList.contains('modal-image-viewer__backdrop')) {
+						event.preventDefault();
+						closeViewer();
+					}
+				});
+				closeButton.addEventListener('click', handleClose);
+				document.addEventListener('keydown', (event) => {
+					if (event.key === 'Escape' && viewer.classList.contains('is-active')) {
+						closeViewer();
+					}
+				});
+				viewer.addEventListener('transitionend', (event) => {
+					if (event.propertyName === 'opacity' && !viewer.classList.contains('is-active')) {
+						viewerImage.src = '';
+						viewerCaption.textContent = '';
+					}
+				});
+				return viewer;
+			};
+			const openViewer = (src, altText) => {
+				const target = ensureViewer();
+				viewerImage.src = src;
+				viewerImage.alt = altText || '';
+				viewerCaption.textContent = altText || '';
+				target.classList.add('is-active');
+				target.setAttribute('aria-hidden', 'false');
+				document.body.classList.add('modal-image-open');
+			};
+			return {
+				open: openViewer,
+				close: closeViewer
+			};
+		})();
+		document.querySelectorAll('.modal-gallery-item').forEach((item) => {
+			const img = item.querySelector('img');
+			if (!img) {
+				return;
+			}
+			item.addEventListener('click', (event) => {
+				event.preventDefault();
+				modalImageViewer.open(img.src, img.alt);
+			});
+		});
 		$(".project-card").magnificPopup({
 			type: "inline",
 			fixedContentPos: true,
@@ -196,7 +243,7 @@ Description: Gerold - Personal Portfolio HTML5 Template
 			closeBtnInside: true,
 			preloader: false,
 			midClick: true,
-			removalDelay: 500,
+			removalDelay: 300,
 			mainClass: 'my-mfp-zoom-in',
 			callbacks: {
 				beforeOpen: function() {
@@ -210,11 +257,26 @@ Description: Gerold - Personal Portfolio HTML5 Template
 							transform: 'translateY(0)'
 						}, 400);
 					});
+				},
+				beforeClose: function() {
+					modalImageViewer.close();
+					const mfp = $.magnificPopup.instance;
+					if (mfp && mfp.wrap) {
+						mfp.wrap.css('pointer-events', 'none');
+					}
+					unlockScroll();
+				},
+				close: function() {
+					unlockScroll();
+					modalImageViewer.close();
+					const mfp = $.magnificPopup.instance;
+					if (mfp && mfp.wrap) {
+						mfp.wrap.css('pointer-events', '');
+					}
 				}
 			}
 		});
 	});
-
 	$(window).on("load", function () {
 		/*------------------------------------------------------
   	/  WoW Js
@@ -227,54 +289,19 @@ Description: Gerold - Personal Portfolio HTML5 Template
 			live: true, // default
 		});
 		wow.init();
-
-		/*------------------------------------------------------
-  	/  Preloader
-  	/------------------------------------------------------*/
-		const svg = document.getElementById("preloaderSvg");
-		const tl = gsap.timeline();
-		const curve = "M0 502S175 272 500 272s500 230 500 230V0H0Z";
-		const flat = "M0 2S175 1 500 1s500 1 500 1V0H0Z";
-
-		tl.to(".preloader-heading .load-text , .preloader-heading .cont", {
-			delay: 1.5,
-			y: -100,
-			opacity: 0,
-		});
-		tl.to(svg, {
-			duration: 0.5,
-			attr: { d: curve },
-			ease: "power2.easeIn",
-		}).to(svg, {
-			duration: 0.5,
-			attr: { d: flat },
-			ease: "power2.easeOut",
-		});
-		tl.to(".preloader", {
-			y: -1500,
-		});
-		tl.to(".preloader", {
-			zIndex: -1,
-			display: "none",
-		});
 	});
-
 	document.addEventListener("DOMContentLoaded", function() {
 		const progressBars = document.querySelectorAll('.progress-bar');
-		
 		progressBars.forEach(bar => {
 			const width = bar.getAttribute('aria-valuenow') + '%';
 			bar.style.setProperty('--progress-width', width);
 		});
 	});
-
 	// Header Sticky
 	const header = document.querySelector('.tj-header-area.header-2');
 	let lastScroll = 0;
-
 	window.addEventListener('scroll', () => {
 		const currentScroll = window.scrollY;
-		
 		if (currentScroll > lastScroll && currentScroll > 50) {
 			// Scrolling down
 			header.classList.add('sticky');
@@ -282,25 +309,20 @@ Description: Gerold - Personal Portfolio HTML5 Template
 			// Scrolling up and at top
 			header.classList.remove('sticky');
 		}
-		
 		lastScroll = currentScroll;
 	});
-
 	document.addEventListener('DOMContentLoaded', function() {
 		const competenceCards = document.querySelectorAll('.competence-card');
-		
 		competenceCards.forEach(card => {
 			card.addEventListener('click', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
-				
 				requestAnimationFrame(() => {
 					this.classList.toggle('active');
 					updateCardStates();
 				});
 			});
 		});
-		
 		document.addEventListener('click', function(e) {
 			if (!e.target.closest('.competence-card')) {
 				requestAnimationFrame(() => {
@@ -311,10 +333,8 @@ Description: Gerold - Personal Portfolio HTML5 Template
 				});
 			}
 		});
-		
 		function updateCardStates() {
 			const activeCards = document.querySelectorAll('.competence-card.active');
-			
 			competenceCards.forEach(card => {
 				if (!card.classList.contains('active')) {
 					if (activeCards.length > 0) {
@@ -327,7 +347,6 @@ Description: Gerold - Personal Portfolio HTML5 Template
 				}
 			});
 		}
-		
 		// Animation à l'apparition des cartes
 		function animateCards() {
 			competenceCards.forEach((card, index) => {
@@ -339,33 +358,26 @@ Description: Gerold - Personal Portfolio HTML5 Template
 				});
 			});
 		}
-		
 		// Initialisation des cartes
 		competenceCards.forEach(card => {
 			card.style.opacity = '0';
 			card.style.transform = 'scale(0.9)';
 		});
-		
 		// Déclenche l'animation initiale
 		setTimeout(animateCards, 300);
 	});
-
 })(jQuery);
-
 function handleCompetenceClick(e) {
 	e.preventDefault();
 	e.stopPropagation();
-
 	// Vérification de l'attribut data-competences
 	const competencesAttr = e.currentTarget.dataset.competences;
 	if (!competencesAttr) {
 		console.error("L'attribut data-competences est manquant.");
 		return;
 	}
-
 	// Conversion en tableau de compétences
 	const competences = competencesAttr.split(',').map(c => c.trim());
-	
 	// Scroll vers la section compétences
 	const section = document.getElementById('competences-section');
 	if (!section) {
@@ -373,24 +385,20 @@ function handleCompetenceClick(e) {
 		return;
 	}
 	section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
 	// Activation des cartes de compétences
 	document.querySelectorAll('.competence-card').forEach(card => {
 		const title = card.querySelector('.competence-title')?.innerText.trim() || '';
 		const shouldActivate = competences.includes(title);
 		card.classList.toggle('active', shouldActivate);
 	});
-
 	// Activation des cartes de projets
 	document.querySelectorAll('.project-card').forEach(projectCard => {
 		const projectCompetencesAttr = projectCard.dataset.competences;
 		if (!projectCompetencesAttr) return;
-		
 		const projectCompetences = projectCompetencesAttr.split(',').map(c => c.trim());
 		const isActive = projectCompetences.some(c => competences.includes(c));
 		projectCard.classList.toggle('active', isActive);
 	});
-
 	// Animation après le scroll
 	setTimeout(() => {
 		document.querySelectorAll('.competence-card.active, .project-card.active').forEach(card => {
@@ -399,20 +407,16 @@ function handleCompetenceClick(e) {
 		});
 	}, 500);
 }
-
 function filterProjects(element) {
 	// Récupère le filtre depuis l'attribut data-filter
 	const filter = element.getAttribute('data-filter');
-	
 	// Active le filtre correspondant
 	const filterButton = document.querySelector(`.filter-button-group button[data-filter="${filter}"]`);
 	if (filterButton) {
 		filterButton.click();
 	}
-	
 	// Scroll vers la section projets
 	document.querySelector('#projects-section').scrollIntoView({
 		behavior: 'smooth'
 	});
 }
-
